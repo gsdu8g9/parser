@@ -1,0 +1,16 @@
+{
+  "name": "nejtr0n/parser",
+  "description": "Comporator kernel classes",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jimmy Nejtr0n",
+      "email": "a6y@xakep.ru"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Parser\\": "src/"
+    }
+  }
+}
