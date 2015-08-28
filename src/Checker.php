@@ -40,6 +40,9 @@ class Checker {
         $this->__rc = new \RollingCurl\RollingCurl();
         $this->__rc->setCallback(array($this, "save"));
         $this->__rc->window_size = $this->__threads;
+        $this->__rc->setOptions(array(
+            CURLOPT_FOLLOWLOCATION => true
+        ));
     }
 
     /**
