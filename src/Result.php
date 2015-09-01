@@ -22,8 +22,9 @@ class Result {
      * @throws \Exception
      */
     public function __construct() {
+        session_start();
         // Tmp storage of requests
-        if (!$this->__db = new \SQLite3("result.db")) {
+        if (!$this->__db = new \SQLite3("result_".session_id().".db")) {
             throw new \Exception('Could not create db!');
         }
     }
