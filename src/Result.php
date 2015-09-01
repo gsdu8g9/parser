@@ -51,11 +51,11 @@ class Result {
                 .$this->__db->escapeString($id)."', '"
                 .$this->__db->escapeString($url)."', '"
                 .$this->__db->escapeString(0)."', '"
-                .$this->__db->escapeString($ar_link['scheme'])."', '"
-                .$this->__db->escapeString($ar_link['host'])."', '"
-                .$this->__db->escapeString($ar_link['path'])."', '"
-                .$this->__db->escapeString($ar_link['query'])."', '"
-                .$this->__db->escapeString($ar_link['fragment'])."'"
+                .$this->__db->escapeString(isset($ar_link['scheme']) && !empty($ar_link['scheme']) ? $ar_link['scheme'] : "")."', '"
+                .$this->__db->escapeString(isset($ar_link['host']) && !empty($ar_link['host']) ? $ar_link['host'] : "")."', '"
+                .$this->__db->escapeString(isset($ar_link['path']) && !empty($ar_link['path']) ? $ar_link['path'] : "")."', '"
+                .$this->__db->escapeString(isset($ar_link['query']) && !empty($ar_link['query']) ? $ar_link['query'] : "")."', '"
+                .$this->__db->escapeString(isset($ar_link['fragment']) && !empty($ar_link['fragment']) ? $ar_link['fragment'] : "")."'"
                 .")");
         } else {
             // Skip url
