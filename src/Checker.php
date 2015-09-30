@@ -48,7 +48,10 @@ class Checker {
                 CURLOPT_CONNECTTIMEOUT => 30,
                 CURLOPT_TIMEOUT        => 30,
                 CURLOPT_FOLLOWLOCATION => true,
-            )    
+                // accept all certs
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false
+            )
         );
     }
 
@@ -131,8 +134,8 @@ class Checker {
         if ($this->isValidateDomain($domain)) {
             $domain = $this->__clearDomain($domain);
             $this->__old_domain = array (
-                'www.'.$domain,
-                $domain
+                'www.'.$this->__clearDomain($domain),
+                $this->__clearDomain($domain)
             );
             return TRUE;
         }
@@ -146,7 +149,7 @@ class Checker {
      */
     public function setNewDomain($domain) {
         if ($this->isValidateDomain($domain)) {
-            $this->__new_domain = $domain;
+            $this->__new_domain = str_replace(array('http://', 'https://', '//'), '', trim($domain, "/"));
             return TRUE;
         }
         return FALSE;
@@ -157,7 +160,7 @@ class Checker {
      * @return mixed
      */
     private function __clearDomain($domain) {
-        return str_replace(array('http://', 'www.'), array('',''), $domain);
+        return str_replace(array('http://', 'www.'), '', trim($domain, "/"));
     }
 
     /**
