@@ -190,18 +190,24 @@ class Checker {
     private function setThreads($threads) {
         $this->__rc->window_size = $this->__threads = intval($threads);
     }
+
     /**
      * Proceed all comparasion
      * Payload
+     * @param $algo
+     * @param array $filters
+     * @param $threads
+     * @return int
+     * @throws \Exception
      */
     public function run($algo, array $filters, $threads) {
         $this->setAlgo($algo);
         $this->setFilters($filters);
         $this->setThreads($threads);
+
         $this->__result->createResultStorage($this->__used_filters);
         // Get data from storage
         foreach ($this->__result->getLinks($this->__threads, $this->__new_domain) as $link) {
-            $this->__counter++;
             // Skip not local urls
             if (!in_array($link['host'], $this->__old_domain)) {
                 $this->__result->addLine($link['id'], $link["url"]["old"], $link["url"]["new"], 1);
@@ -212,10 +218,31 @@ class Checker {
                 $this->__result->addLine($link['id'], $link["url"]["old"], $link["url"]["new"], 1);
                 continue;
             }
+            $this->__counter++;
+            // Один запрос на robots по первому url
+            if ($this->__counter == 1) {
+                $old = parse_url($link["url"]["old"]);
+                $old_host = 'http://'.$old['host'];
+                $new = parse_url($link["url"]["new"]);
+                $new_host = 'http://'.$new['host'];
+
+                $old_robots = new \Parser\Xbb_RobotsTxt($old_host);
+                $new_robots = new \Parser\Xbb_RobotsTxt($new_host);
+            }
             $this->__result->addLine($link['id'], $link["url"]["old"], $link["url"]["new"]);
             $this->__rc->add((new \RollingCurl\Request ($link["url"]["old"], "GET"))->setHeaders(array("Line: ".$link['id'], 'Site: old')));
             $this->__rc->add((new \RollingCurl\Request ($link["url"]["new"], "GET"))->setHeaders(array("Line: ".$link['id'], 'Site: new')));
+            // Robots data
+            $robots_data  = ($old_robots->allow($link["url"]["old"])) ? '<p class="text-success">Allow</p>': '<p class="text-danger">Disallow</p>';
+            $robots_data .= ' / ';
+            $robots_data .= ($new_robots->allow($link["url"]["new"])) ? '<p class="text-success">Allow</p>': '<p class="text-danger">Disallow</p>';
+            $this->__result->addResult(
+                $link['id'],
+                'Robots',
+                $robots_data
+            );
         }
+
         // Proceed requests
         $this->__rc->execute();
         // prepare result
@@ -227,6 +254,7 @@ class Checker {
             }
             $old_request = unserialize(base64_decode($this->__result->getOldResponse($link['id'])));
             $new_request = unserialize(base64_decode($this->__result->getNewResponse($link['id'])));
+
             foreach ($this->__used_filters as $filter) {
                 if ($link['skip'] == 1) {
                     continue;

@@ -12,9 +12,11 @@ namespace Parser;
 
 abstract class Filter implements \Parser\Interfaces\Filter {
     use Traits\Named;
+    use Traits\Singleton;
+
     private $__regexp = '';
 
-    public function __construct($regexp) {
+    protected function __construct($regexp) {
         $this->__regexp = $regexp;
     }
 

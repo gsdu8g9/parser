@@ -152,7 +152,7 @@ class Result {
         foreach ($filters as $name => $filter) {
             $filters_string .= ", ".$name." text";
         }
-        $this->__db->exec('CREATE TABLE if NOT EXISTS result (id int unsigned primary_key not null, old_url text, new_url text,  skip integer default 0'.$filters_string.')');
+        $this->__db->exec('CREATE TABLE if NOT EXISTS result (id int unsigned primary_key not null, old_url text, new_url text,  skip integer default 0, Robots text'.$filters_string.')');
         $this->__db->exec('CREATE TABLE if NOT EXISTS new (id int unsigned primary_key not null, url text, data blob)');
         $this->__db->exec('CREATE TABLE if NOT EXISTS old (id int unsigned primary_key not null, url text, data blob)');
     }
