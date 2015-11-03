@@ -21,6 +21,8 @@ class Checker {
     private $__algorythms = array();
     private $__used_algorythm = NULL;
     private $__result = NULL;
+    private $__old_encoding = NULL;
+    private $__new_encoding = NULL;
     // Add extensions to skip here
     private $__skip_files = array (
         "jpg",
@@ -30,6 +32,7 @@ class Checker {
         "pdf",
         "css",
         "js",
+        "ico"
     );
 
 
@@ -200,10 +203,12 @@ class Checker {
      * @return int
      * @throws \Exception
      */
-    public function run($algo, array $filters, $threads) {
+    public function run($algo, array $filters, $threads, $old_encoding = "UTF-8", $new_encoding = "UTF-8") {
         $this->setAlgo($algo);
         $this->setFilters($filters);
         $this->setThreads($threads);
+        $this->__old_encoding = $old_encoding;
+        $this->__new_encoding = $new_encoding;
 
         $this->__result->createResultStorage($this->__used_filters);
         // Get data from storage
@@ -230,12 +235,12 @@ class Checker {
                 $new_robots = new \Parser\Xbb_RobotsTxt($new_host);
             }
             $this->__result->addLine($link['id'], $link["url"]["old"], $link["url"]["new"]);
-            $this->__rc->add((new \RollingCurl\Request ($link["url"]["old"], "GET"))->setHeaders(array("Line: ".$link['id'], 'Site: old')));
-            $this->__rc->add((new \RollingCurl\Request ($link["url"]["new"], "GET"))->setHeaders(array("Line: ".$link['id'], 'Site: new')));
+            $this->__rc->add((new RequestOld ($link["url"]["old"], "GET"))->setHeaders(array("Line: ".$link['id'], 'Site: old')));
+            $this->__rc->add((new RequestNew ($link["url"]["new"], "GET"))->setHeaders(array("Line: ".$link['id'], 'Site: new')));
             // Robots data
-            $robots_data  = ($old_robots->allow($link["url"]["old"])) ? '<p class="text-success">Allow</p>': '<p class="text-danger">Disallow</p>';
+            $robots_data  = ($old_robots->allow($link["url"]["old"])) ? '<p class="text-success">Allow</p>' : '<p class="text-danger">Disallow</p>';
             $robots_data .= ' / ';
-            $robots_data .= ($new_robots->allow($link["url"]["new"])) ? '<p class="text-success">Allow</p>': '<p class="text-danger">Disallow</p>';
+            $robots_data .= ($new_robots->allow($link["url"]["new"])) ? '<p class="text-success">Allow</p>' : '<p class="text-danger">Disallow</p>';
             $this->__result->addResult(
                 $link['id'],
                 'Robots',
@@ -279,6 +284,18 @@ class Checker {
     public function save(\RollingCurl\Request $request, \RollingCurl\RollingCurl $rollingCurl) {
         $line = $this->getLine($request);
         $site = $this->getSite($request);
+        /* Преобразует в UTF-8 */
+        if ($request instanceof \Parser\RequestOld) {
+            if ($this->__old_encoding !== "UTF-8") {
+                $request->setResponseText(mb_convert_encoding($request->getResponseText(), "UTF-8", $this->__old_encoding));
+            }
+        }
+        if ($request instanceof \Parser\RequestNew) {
+            if ($this->__new_encoding !== "UTF-8") {
+                $request->setResponseText(mb_convert_encoding($request->getResponseText(), "UTF-8", $this->__new_encoding));
+            }
+        }
+
         $this->__result->addData($line, $request->getUrl(), base64_encode(serialize($request)), $site);
     }
 }

@@ -26,6 +26,11 @@ class Shingle extends \Parser\Algorithm {
         if (!$first || !$second) {
             return -1;
         }
+        // Debug
+        //var_dump($first);
+        //var_dump($second);
+        //exit;
+
         $first_shingles = array_unique($this->get_shingle($first, $this->__shingle));
         $second_shingles = array_unique($this->get_shingle($second, $this->__shingle));
 
