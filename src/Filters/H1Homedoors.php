@@ -11,6 +11,6 @@ namespace Parser\Filters;
 
 class H1Homedoors extends \Parser\Filter {
     public function __construct() {
-        parent::__construct("/<body>.*<h1>(.+)<.*<\/body>/siU");
+        parent::__construct("/<body>.*<h1>(.*)<.*<\/body>/siU");
     }
 }

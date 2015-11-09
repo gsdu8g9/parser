@@ -11,6 +11,6 @@ namespace Parser\Filters;
 
 class MetaKeywords extends \Parser\Filter {
     public function __construct() {
-        parent::__construct("/<meta name=\"keywords\" content=\"(.+)\">/siU");
+        parent::__construct("/<meta.*name=\"|\'keywords\"|\'.*content=\"|\'(.+)\"|\'.*>/siU");
     }
 }

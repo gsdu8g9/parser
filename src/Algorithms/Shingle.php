@@ -23,13 +23,13 @@ class Shingle extends \Parser\Algorithm {
      * @return float|int
      */
     public function check_it($first, $second) {
-        if (!$first || !$second) {
-            return -1;
-        }
         // Debug
         //var_dump($first);
         //var_dump($second);
         //exit;
+        if (!$first || !$second) {
+            return -1;
+        }
 
         $first_shingles = array_unique($this->get_shingle($first, $this->__shingle));
         $second_shingles = array_unique($this->get_shingle($second, $this->__shingle));

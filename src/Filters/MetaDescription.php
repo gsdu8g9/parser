@@ -11,6 +11,6 @@ namespace Parser\Filters;
 
 class MetaDescription extends \Parser\Filter {
     public function __construct() {
-        parent::__construct("/<meta name=\"description\" content=\"(.+)\">/siU");
+        parent::__construct("/<meta.*name==\"|\'description=\"|\'.*content==\"|\'(.+)=\"|\'.*>/siU");
     }
 }
