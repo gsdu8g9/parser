@@ -33,6 +33,7 @@ class Result {
      * Create storage tables
      */
     public function init() {
+        $this->__db->exec('PRAGMA synchronous=OFF');
         $this->__db->exec('DROP TABLE IF EXISTS links');
         $this->__db->exec('CREATE TABLE links (id int unsigned primary_key not null, url text, skip int default 0, scheme text default NULL, host text default NULL, path text default NULL, query text default NULL, fragment text default NULL)');
         $this->__db->exec('DROP TABLE IF EXISTS new');
