@@ -11,4 +11,10 @@ namespace Parser\Interfaces;
 
 interface Filter {
     public function filter(\RollingCurl\Request $data);
+    /**
+     * Return method to compare data
+     * @return \Parser\Method
+     */
+    public function getMethod();
+
 }

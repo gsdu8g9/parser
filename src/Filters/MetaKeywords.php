@@ -7,10 +7,19 @@
  */
 
 namespace Parser\Filters;
-
+use Parser\Traits\Singleton;
+use \Parser\Methods\Text;
 
 class MetaKeywords extends \Parser\Filter {
-    public function __construct() {
-        parent::__construct("/<meta.*name=\"|\'keywords\"|\'.*content=\"|\'(.+)\"|\'.*>/siU");
+    use Singleton;
+    protected function __construct() {
+        parent::__construct("/<meta[^>]*name=[\"|\']keywords[\"|\'][^>]*content=[\"]([^\"]*)[\"][^>]*>/i");
+    }
+    /**
+     * Return method to compare data
+     * @return \Parser\Method
+     */
+    public function getMethod() {
+        return new Text($this);
     }
 }

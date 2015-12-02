@@ -10,9 +10,11 @@
  * Shingle algo wrapper
  */
 namespace Parser\Algorithms;
+use \Parser\Algorithm;
+use \Parser\Traits\Singleton;
 
-
-class Shingle extends \Parser\Algorithm {
+class Shingle extends Algorithm {
+    use Singleton;
 
     private $__shingle = 1; // Shingle size
     /**
@@ -39,7 +41,7 @@ class Shingle extends \Parser\Algorithm {
             return -2;
         }
         $intersect = array_intersect($first_shingles,$second_shingles);
-        $merge = array_unique(array_merge($first_shingles,$second_shingles));
+        $merge = array_unique(array_merge($first_shingles, $second_shingles));
         $diff = (count($intersect)/count($merge))/0.01;
         return round($diff, 2);
     }

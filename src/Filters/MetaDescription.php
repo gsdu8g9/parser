@@ -7,10 +7,19 @@
  */
 
 namespace Parser\Filters;
-
+use Parser\Traits\Singleton;
+use \Parser\Methods\Text;
 
 class MetaDescription extends \Parser\Filter {
-    public function __construct() {
-        parent::__construct("/<meta.*name==\"|\'description=\"|\'.*content==\"|\'(.+)=\"|\'.*>/siU");
+    use Singleton;
+    protected function __construct() {
+        parent::__construct("/<meta[^>]*name=[\"|\']description[\"|\'][^>]*content=[\"]([^\"]*)[\"][^>]*>/i");
+    }
+    /**
+     * Return method to compare data
+     * @return \Parser\Method
+     */
+    public function getMethod() {
+        return new Text($this);
     }
 }

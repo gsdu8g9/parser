@@ -12,7 +12,7 @@ namespace Parser\Traits;
 trait Singleton {
     static protected $instance;
 
-    protected function __construct() { /* ... @return Singleton */ }  // Защищаем от создания через new Singleton
+    private function __construct() { /* ... @return Singleton */ }  // Защищаем от создания через new Singleton
     private function __clone() { /* ... @return Singleton */ }  // Защищаем от создания через клонирование
     private function __wakeup() { /* ... @return Singleton */ }  // Защищаем от создания через unserialize
 

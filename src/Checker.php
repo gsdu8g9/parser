@@ -19,7 +19,6 @@ class Checker {
     private $__filters = array();
     private $__used_filters = array();
     private $__algorythms = array();
-    private $__used_algorythm = NULL;
     private $__result = NULL;
     private $__old_encoding = NULL;
     private $__new_encoding = NULL;
@@ -37,7 +36,6 @@ class Checker {
 
 
     public function __construct() {
-        $this->__setAlgo();
         $this->__setFilters();
         $this->__result = new \Parser\Result();
         $this->__rc = new \RollingCurl\RollingCurl();
@@ -59,29 +57,11 @@ class Checker {
     }
 
     /**
-     * Search classes in directory Algorithms and init them
-     */
-    private function __setAlgo() {
-        foreach (array_diff(scandir(dirname(__FILE__).DIRECTORY_SEPARATOR.'Algorithms'), array('..', '.')) as $algo) {
-            $a = new ${!${false} = '\Parser\Algorithms\\'.pathinfo($algo, PATHINFO_FILENAME)};
-            $this->__algorythms[$a->getName()] = $a;
-        }
-    }
-
-    /**
-     * List of available algorithms
-     * @return array
-     */
-    public function getAlgo() {
-        return $this->__algorythms;
-    }
-
-    /**
      * Find out a
      */
     private function __setFilters() {
         foreach (array_diff(scandir(dirname(__FILE__).DIRECTORY_SEPARATOR.'Filters'), array('..', '.')) as $filter) {
-            $a = new ${!${false} = '\Parser\Filters\\'.pathinfo($filter, PATHINFO_FILENAME)};
+            $a = call_user_func(array('\Parser\Filters\\'.pathinfo($filter, PATHINFO_FILENAME), 'getInstance'));
             $this->__filters[$a->getName()] = $a;
         }
     }
@@ -167,15 +147,6 @@ class Checker {
     }
 
     /**
-     * Attach compare algorythm
-     * @param $algo
-     */
-    private function setAlgo($algo) {
-        if (array_key_exists($algo, $this->__algorythms)) {
-            $this->__used_algorythm =& $this->__algorythms[$algo];
-        }
-    }
-    /**
      * Attach filters
      * @param array $filters
      */
@@ -197,14 +168,12 @@ class Checker {
     /**
      * Proceed all comparasion
      * Payload
-     * @param $algo
      * @param array $filters
      * @param $threads
      * @return int
      * @throws \Exception
      */
-    public function run($algo, array $filters, $threads, $old_encoding = "UTF-8", $new_encoding = "UTF-8") {
-        $this->setAlgo($algo);
+    public function run(array $filters, $threads, $old_encoding = "UTF-8", $new_encoding = "UTF-8") {
         $this->setFilters($filters);
         $this->setThreads($threads);
         $this->__old_encoding = $old_encoding;
@@ -223,29 +192,10 @@ class Checker {
                 $this->__result->addLine($link['id'], $link["url"]["old"], $link["url"]["new"], 1);
                 continue;
             }
-            $this->__counter++;
-            // Один запрос на robots по первому url
-            if ($this->__counter == 1) {
-                $old = parse_url($link["url"]["old"]);
-                $old_host = 'http://'.$old['host'];
-                $new = parse_url($link["url"]["new"]);
-                $new_host = 'http://'.$new['host'];
-
-                $old_robots = new \Parser\Xbb_RobotsTxt($old_host);
-                $new_robots = new \Parser\Xbb_RobotsTxt($new_host);
-            }
             $this->__result->addLine($link['id'], $link["url"]["old"], $link["url"]["new"]);
             $this->__rc->add((new RequestOld ($link["url"]["old"], "GET"))->setHeaders(array("Line: ".$link['id'], 'Site: old')));
             $this->__rc->add((new RequestNew ($link["url"]["new"], "GET"))->setHeaders(array("Line: ".$link['id'], 'Site: new')));
-            // Robots data
-            $robots_data  = ($old_robots->allow($link["url"]["old"])) ? '<p class="text-success">Allow</p>' : '<p class="text-danger">Disallow</p>';
-            $robots_data .= ' / ';
-            $robots_data .= ($new_robots->allow($link["url"]["new"])) ? '<p class="text-success">Allow</p>' : '<p class="text-danger">Disallow</p>';
-            $this->__result->addResult(
-                $link['id'],
-                'Robots',
-                $robots_data
-            );
+            $this->__counter++;
         }
 
         // Proceed requests
@@ -264,16 +214,16 @@ class Checker {
                 if ($link['skip'] == 1) {
                     continue;
                 }
-                $this->__result->addResult(
-                    $link['id'],
-                    $filter->getName(),
-                    $this->__used_algorythm->check_it(
-                        $filter->filter($old_request),
-                        $filter->filter($new_request)
-                    )
-                );
+                foreach ($filter->getMethod()->execute ($old_request, $new_request) as $col => $data) {
+                    $this->__result->addResult(
+                        $link['id'],
+                        $col,
+                        $data
+                    );
+                }
             }
         }
+        // Удаляем ссылки
         $this->__result->delLinks($this->__threads);
         return ($links_exists) ? 1 : 0;
     }

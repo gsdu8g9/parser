@@ -14,9 +14,12 @@
  * Класс для парсинга и последующей работы с robots.txt
  */
 namespace Parser;
+use \Parser\Traits\Singleton;
+use \Parser\Traits\Named;
 
 class Xbb_RobotsTxt {
-    use \Parser\Traits\Named;
+    use Named;
+    use Singleton;
 
     /**
      * Максимальный размер файла robots.txt
@@ -38,12 +41,20 @@ class Xbb_RobotsTxt {
      */
     private $_allows = array();
 
+
+    static public function getInstance($url) {
+        if (empty(static::$instance)) {
+            static::$instance = new static($url);
+        }
+
+        return static::$instance;
+    }
     /**
      * Конструктор
      * @param $url
      * @throws \Exception
      */
-    public function __construct($url)
+    private function __construct($url)
     {
         if (false === ($arUrl = @parse_url($url))) {
             throw new \Exception('Невозможно распарсить URL "' . $url . '"');

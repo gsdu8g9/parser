@@ -9,10 +9,11 @@
  * Wrap regexp to filter content
  */
 namespace Parser;
+use \RollingCurl\Request;
+use \Parser\Interfaces\Filter as IFilter;
 
-abstract class Filter implements \Parser\Interfaces\Filter {
+abstract class Filter implements IFilter{
     use Traits\Named;
-    use Traits\Singleton;
 
     private $__regexp = '';
 
@@ -20,7 +21,7 @@ abstract class Filter implements \Parser\Interfaces\Filter {
         $this->__regexp = $regexp;
     }
 
-    public function filter(\RollingCurl\Request $data) {
+    public function filter(Request $data) {
         preg_match($this->__regexp, $data->getResponseText(), $match);
         return (!empty($match[1])) ? $match[1] : NULL;
     }

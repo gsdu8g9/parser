@@ -150,8 +150,9 @@ class Result {
      */
     public function createResultStorage(array $filters) {
         $filters_string = '';
-        foreach ($filters as $name => $filter) {
-            $filters_string .= ", ".$name." text";
+        foreach ($filters as $filter) {
+            /* @var $filter \Parser\Filter */
+            $filters_string .= ", ".$filter->getMethod()->getColumns()." text";
         }
         $this->__db->exec('CREATE TABLE if NOT EXISTS result (id int unsigned primary_key not null, old_url text, new_url text,  skip integer default 0, Robots text'.$filters_string.')');
         $this->__db->exec('CREATE TABLE if NOT EXISTS new (id int unsigned primary_key not null, url text, data blob)');
